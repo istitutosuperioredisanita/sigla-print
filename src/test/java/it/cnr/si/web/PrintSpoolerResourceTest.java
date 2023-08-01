@@ -19,6 +19,7 @@ package it.cnr.si.web;
 
 import it.cnr.si.domain.sigla.*;
 import net.sf.jasperreports.engine.JRParameter;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static org.junit.Assert.assertTrue;
@@ -40,6 +42,8 @@ public class PrintSpoolerResourceTest {
 
     @Autowired
     private PrintSpoolerResource printSpooleResource;
+
+    private Long pgStampa;
 
     @Test
     public void testCreate() throws Exception {
@@ -79,7 +83,12 @@ public class PrintSpoolerResourceTest {
                 String.class.getCanonicalName()));
 
         ResponseEntity<Long> responseEntity = printSpooleResource.createPrintSpooler(printSpooler, "tes");
+        pgStampa = responseEntity.getBody();
         assertTrue(responseEntity.getBody().compareTo(Long.decode("0")) > 0);
     }
 
+    @After
+    public void shutdown() {
+        printSpooleResource.deletePrintSpooler(pgStampa, "tes");
+    }
 }
