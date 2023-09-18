@@ -34,7 +34,7 @@ public class StampaMastroScriptlet extends JRDefaultScriptlet {
         java.sql.Connection conn = (java.sql.Connection) getParameterValue(JRParameter.REPORT_CONNECTION);
         java.sql.CallableStatement cs = null;
         try {
-            cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?)}");
+            cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?,?,?)}");
             cs.setObject(1, getParameterValue("P_ESERCIZIO"));
             cs.setObject(2, getParameterValue("P_TIPO"));
             cs.setObject(3, getParameterValue("P_NUM_LIV"));
