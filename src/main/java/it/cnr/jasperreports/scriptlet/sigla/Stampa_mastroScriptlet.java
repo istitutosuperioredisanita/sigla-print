@@ -22,19 +22,19 @@ import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRScriptletException;
 
 
-public class StampaMastroScriptlet extends JRDefaultScriptlet {
+public class Stampa_mastroScriptlet extends JRDefaultScriptlet {
 
     /**
      * Creates a new instance of JRIreportDefaultScriptlet
      */
-    public StampaMastroScriptlet() {
+    public Stampa_mastroScriptlet() {
     }
 
     public void beforeReportInit() throws JRScriptletException {
         java.sql.Connection conn = (java.sql.Connection) getParameterValue(JRParameter.REPORT_CONNECTION);
         java.sql.CallableStatement cs = null;
         try {
-            cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?,?,?)}");
+            cs = conn.prepareCall("{call PRC_LOAD_TABLE_STAMPA_RENDIC(?,?,?,?,?,?,'Y','N','N','N','N','N','N','SYSTEM',?,?)}");
             cs.setObject(1, getParameterValue("P_ESERCIZIO"));
             cs.setObject(2, getParameterValue("P_TIPO"));
             cs.setObject(3, getParameterValue("P_NUM_LIV"));
