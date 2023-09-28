@@ -41,8 +41,8 @@ public class Stampa_mastroScriptlet extends JRDefaultScriptlet {
             cs.setObject(4, getParameterValue("P_TIPO_AGGREGAZIONE"));
             cs.setObject(5, getParameterValue("P_TIPO_RENDICONTO"));
             cs.setObject(6, getParameterValue("P_ORIGINE"));
-            cs.setObject(7, getParameterValue("VOCE_DA"));
-            cs.setObject(8, getParameterValue("VOCE_A"));
+            cs.setObject(7, getParameterValue("P_VOCE_DA"));
+            cs.setObject(8, getParameterValue("P_VOCE_A"));
             cs.executeQuery();
         } catch (Throwable e) {
             throw new JRScriptletException(e.getMessage());
