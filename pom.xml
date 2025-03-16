@@ -310,8 +310,23 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</connection>
-    <developerConnection>scm:git:ssh://git@git.si.cnr.it/dev/sigla-print.git</developerConnection>
-    <tag>sigla-print-1.0.7</tag>
+    <connection>scm:git@github.com:istitutosuperioredisanita/sigla-print.git</connection>
+    <developerConnection>scm:git@github.com:istitutosuperioredisanita/sigla-print.git</developerConnection>
+    <tag>HEAD</tag>
   </scm>
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/istitutosuperioredisanita/sigla-print</url>
+    </repository>
+    <snapshotRepository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/istitutosuperioredisanita/sigla-print</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </snapshotRepository>
+  </distributionManagement>
 </project>

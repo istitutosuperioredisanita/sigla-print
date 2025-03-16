@@ -34,12 +34,13 @@ public class ContoeconomicoriclassificatoScriptlet extends JRDefaultScriptlet {
         java.sql.CallableStatement cs = null;
         try {
 
-            cs = conn.prepareCall("{call PRT_S_CE_RICLASSIFICATO_J(?,?,?,?,?)}");
+            cs = conn.prepareCall("{call PRT_S_CE_RICLASSIFICATO_J(?,?,?,?,?,?)}");
             cs.setObject(1, getParameterValue("IST_COMM"));
             cs.setObject(2, getParameterValue("inEs"));
             cs.setObject(3, getParameterValue("CDS"));
             cs.setObject(4, getParameterValue("uo"));
             cs.setObject(5, getParameterValue("dettaglioConti"));
+            cs.setObject(6, getParameterValue("CD_TIPO_BILANCIO"));
             cs.executeQuery();
         } catch (Throwable e) {
             throw new JRScriptletException(e.getMessage());

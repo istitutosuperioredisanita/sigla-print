@@ -34,13 +34,14 @@ public class StatopatrimonialericlassificatoScriptlet extends JRDefaultScriptlet
         java.sql.Connection conn = (java.sql.Connection) getParameterValue(JRParameter.REPORT_CONNECTION);
         java.sql.CallableStatement cs = null;
         try {
-            cs = conn.prepareCall("{call PRT_S_SP_RICLASSIFICATO(?,?,?,?,?,?)}");
+            cs = conn.prepareCall("{call PRT_S_SP_RICLASSIFICATO(?,?,?,?,?,?,?)}");
             cs.setObject(1, getParameterValue("ATTPAS"));
             cs.setObject(2, getParameterValue("IST_COMM"));
             cs.setObject(3, getParameterValue("inEs"));
             cs.setObject(4, getParameterValue("CDS"));
             cs.setObject(5, getParameterValue("uo"));
             cs.setObject(6, getParameterValue("dettaglioConti"));
+            cs.setObject(7, getParameterValue("CD_TIPO_BILANCIO"));
             cs.executeQuery();
         } catch (Throwable e) {
             throw new JRScriptletException(e.getMessage());
