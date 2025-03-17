@@ -15,7 +15,7 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
       - name: Publish package
-        run: mvn clean deploy -s .m2/settings.xml -DskipTests --batch-mode --errors --fail-at-end --show-version
+        run: mvn clean deploy -s .m2/settings.xml -P-sonar -DskipTests --batch-mode --errors --fail-at-end --show-version
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
