@@ -20,7 +20,7 @@ jobs:
         run: |
           git config --global user.email "dirgensa@iss.it"
           git config --global user.name "dirgensa"
-          mvn release:prepare release:perform -s .m2/settings.xml -P-sonar -DskipTests -Darguments="-P-sonar -DskipTests" --batch-mode --errors --fail-at-end --show-version -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+          mvn release:prepare release:perform -s .m2/settings.xml -P-sonar -DskipTests -Darguments="-DskipTests" --batch-mode --errors --fail-at-end --show-version -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
