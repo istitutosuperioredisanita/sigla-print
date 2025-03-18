@@ -310,8 +310,8 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git@github.com:istitutosuperioredisanita/sigla-print.git</connection>
-    <developerConnection>scm:git@github.com:istitutosuperioredisanita/sigla-print.git</developerConnection>
+    <connection>scm:git:git@github.com:istitutosuperioredisanita/sigla-print.git</connection>
+    <developerConnection>scm:git:git@github.com:istitutosuperioredisanita/sigla-print.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <distributionManagement>
