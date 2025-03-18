@@ -15,7 +15,7 @@ jobs:
           java-version: '8'
           distribution: 'temurin'
       - name: Publish package
-        run: mvn release:prepare release:perform -s .m2/settings.xml -P-sonar -DskipTests --batch-mode --errors --fail-at-end --show-version -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
+        run: mvn release:prepare release:perform -s .m2/settings.xml -P-sonar -DskipTests -Darguments="-DskipTests" --batch-mode --errors --fail-at-end --show-version -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }}
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
