@@ -21,7 +21,7 @@
 
   <groupId>it.cnr.si.sigla</groupId>
   <artifactId>sigla-print</artifactId>
-  <version>2.1.8</version>
+  <version>2.1.10-SNAPSHOT</version>
   <packaging>war</packaging>
 
   <name>Print and Excel Server</name>
@@ -244,6 +244,13 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <releaseProfiles>!sonar</releaseProfiles>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
