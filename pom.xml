@@ -312,7 +312,7 @@
   <scm>
     <connection>scm:git:git@github.com:istitutosuperioredisanita/sigla-print.git</connection>
     <developerConnection>scm:git:git@github.com:istitutosuperioredisanita/sigla-print.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>2.1.2</tag>
   </scm>
   <distributionManagement>
     <repository>
