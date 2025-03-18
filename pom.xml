@@ -21,7 +21,7 @@
 
   <groupId>it.cnr.si.sigla</groupId>
   <artifactId>sigla-print</artifactId>
-  <version>2.1.8-SNAPSHOT</version>
+  <version>2.1.8</version>
   <packaging>war</packaging>
 
   <name>Print and Excel Server</name>
@@ -313,7 +313,7 @@
     <connection>scm:git:https://github.com/istitutosuperioredisanita/sigla-print.git</connection>
     <developerConnection>scm:git:https://github.com/istitutosuperioredisanita/sigla-print.git</developerConnection>
     <url>https://github.com/istitutosuperioredisanita/sigla-print</url>
-    <tag>HEAD</tag>
+    <tag>2.1.8</tag>
   </scm>
   <distributionManagement>
     <repository>
