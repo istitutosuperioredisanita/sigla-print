@@ -19,10 +19,14 @@ jobs:
         env:
           GITHUB_USERNAME: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and Push Container to ghcr.io
-        uses: GlueOps/github-actions-build-push-containers@v0.3.7
-        with:
-          dockerfile: ./Dockerfile
-          context: .
-          tags: latest
 
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/sigla-print:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push ghcr.io/${{ github.repository }}/sigla-print:latest
