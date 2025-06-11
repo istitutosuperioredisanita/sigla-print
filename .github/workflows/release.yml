@@ -27,6 +27,7 @@ jobs:
         uses: GlueOps/github-actions-build-push-containers@v0.3.7
         with:
           dockerfile: ./Dockerfile
+          context: .          
           tags: ${{ github.event.release.tag_name }}          
       - name: Update version in pom.xml for SNAPSHOT versions
         run: |
