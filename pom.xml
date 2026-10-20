@@ -277,24 +277,6 @@
           <releaseProfiles>!sonar</releaseProfiles>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-maven-plugin</artifactId>
-        <version>${spring-boot.version}</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>repackage</goal>
-            </goals>
-            <configuration>
-              <mainClass>${start-class}</mainClass>
-            </configuration>
-          </execution>
-        </executions>
-        <configuration>
-          <mainClass>${start-class}</mainClass>
-        </configuration>
-      </plugin>
       <!-- Add modern JaCoCo plugin to prevent Java 21 system class instrumentation crashes -->
       <plugin>
         <groupId>org.jacoco</groupId>
