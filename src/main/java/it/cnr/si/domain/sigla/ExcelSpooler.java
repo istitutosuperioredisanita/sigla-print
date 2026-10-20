@@ -333,7 +333,7 @@ public class ExcelSpooler implements Serializable {
         fileName = fileName.replace(' ', '_');
         if (fileName.startsWith("_"))
             fileName = fileName.substring(1);
-        fileName = fileName + ".xls";
+        fileName = fileName + ".xlsx";
         fileName = FILE_FORMAT.format(new Date()) + '_' + pgEstrazione + '_' + fileName;
         return fileName;
     }
