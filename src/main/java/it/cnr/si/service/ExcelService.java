@@ -24,6 +24,8 @@ import it.cnr.si.repository.ExcelRepository;
 import it.cnr.si.repository.ParametriEnteRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -104,15 +106,15 @@ public class ExcelService implements InitializingBean {
         HSSFCell c = null; // dichiaro c di tipo cella
         s.setDefaultColumnWidth((short) 20);
         HSSFCellStyle cellStyle = wb.createCellStyle();
-        cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER_SELECTION);
+        cellStyle.setAlignment(HorizontalAlignment.CENTER_SELECTION);
         HSSFFont font = wb.createFont();
-        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        font.setBold(Boolean.TRUE);
         cellStyle.setFont(font);
 
         HSSFCellStyle cellHeaderStyle = wb.createCellStyle();
-        cellHeaderStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER_SELECTION);
+        cellHeaderStyle.setAlignment(HorizontalAlignment.CENTER_SELECTION);
         HSSFFont fontHeader = wb.createFont();
-        fontHeader.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        fontHeader.setBold(Boolean.TRUE);
         fontHeader.setColor(HSSFFont.COLOR_RED);
         cellHeaderStyle.setFont(fontHeader);
         int numSheet = 1;
@@ -163,20 +165,20 @@ public class ExcelService implements InitializingBean {
                     if (valoreStringa != null) {
                         if (column.getColumnType() != null) {
                             if (column.getColumnType().equalsIgnoreCase("VARCHAR")) {
-                                c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                                c.setCellType(CellType.STRING);
                                 c.setCellValue(new HSSFRichTextString(valoreStringa));
                             } else if (column.getColumnType().equalsIgnoreCase("DECIMAL")) {
-                                c.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+                                c.setCellType(CellType.STRING);
                                 c.setCellValue(new BigDecimal(valoreStringa).doubleValue());
                             } else if (column.getColumnType().equalsIgnoreCase("TIMESTAMP")) {
-                                c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                                c.setCellType(CellType.STRING);
                                 c.setCellValue(new HSSFRichTextString(valoreStringa));
                             } else {
-                                c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                                c.setCellType(CellType.STRING);
                                 c.setCellValue(new HSSFRichTextString(valoreStringa));
                             }
                         } else {
-                            c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                            c.setCellType(CellType.STRING);
                             c.setCellValue(new HSSFRichTextString(valoreStringa));
                         }
                     }
@@ -286,7 +288,7 @@ public class ExcelService implements InitializingBean {
                 HSSFCell c = r.createCell(cellnum);
                 c.setCellValue(new HSSFRichTextString(column.getColumnLabel()));
                 c.setCellStyle(cellStyle);
-                c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                c.setCellType(CellType.STRING);
             }
         } else {
             for (ExcelSpoolerParam column : columns) {
@@ -295,7 +297,7 @@ public class ExcelService implements InitializingBean {
                     HSSFCell c = r.createCell(cellnum);
                     c.setCellValue(new HSSFRichTextString(column.getHeaderLabel()));
                     c.setCellStyle(cellHeaderStyle);
-                    c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                    c.setCellType(CellType.STRING);
                 }
             }
             r = s.createRow(rownum++); //creo la seconda
@@ -305,7 +307,7 @@ public class ExcelService implements InitializingBean {
                 HSSFCell c = r.createCell(cellnum);
                 c.setCellValue(new HSSFRichTextString(column.getColumnLabel()));
                 c.setCellStyle(cellStyle);
-                c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                c.setCellType(CellType.STRING);
             }
         }
         return rownum;
