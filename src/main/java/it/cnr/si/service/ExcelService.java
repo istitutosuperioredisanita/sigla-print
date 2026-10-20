@@ -24,6 +24,8 @@ import it.cnr.si.repository.ExcelRepository;
 import it.cnr.si.repository.ParametriEnteRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,7 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.OptimisticLockException;
+import jakarta.persistence.OptimisticLockException;
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.InetAddress;
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
 @Service
 public class ExcelService implements InitializingBean {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExcelService.class);
-    Integer MAX_RIGHE_FOGLIO = new Integer(65530);
+    Integer MAX_RIGHE_FOGLIO = 65530;
 
     @Value("${file.separator}")
     private String fileSeparator;
@@ -102,22 +104,23 @@ public class ExcelService implements InitializingBean {
         HSSFSheet s = wb.createSheet(excelSpooler.getSheetName()); // creo un foglio
         HSSFRow r = null; // dichiaro r di tipo riga
         HSSFCell c = null; // dichiaro c di tipo cella
-        s.setDefaultColumnWidth((short) 20);
+        s.setDefaultColumnWidth(20);
+
         HSSFCellStyle cellStyle = wb.createCellStyle();
-        cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER_SELECTION);
+        cellStyle.setAlignment(HorizontalAlignment.CENTER_SELECTION);
         HSSFFont font = wb.createFont();
-        font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        font.setBold(true);
         cellStyle.setFont(font);
 
         HSSFCellStyle cellHeaderStyle = wb.createCellStyle();
-        cellHeaderStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER_SELECTION);
+        cellHeaderStyle.setAlignment(HorizontalAlignment.CENTER_SELECTION);
         HSSFFont fontHeader = wb.createFont();
-        fontHeader.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+        fontHeader.setBold(true);
         fontHeader.setColor(HSSFFont.COLOR_RED);
         cellHeaderStyle.setFont(fontHeader);
         int numSheet = 1;
 
-        short cellnum = (short) -1;
+        int cellnum = -1;
         int rownum = 0;
 
         try {
@@ -125,7 +128,7 @@ public class ExcelService implements InitializingBean {
             if (Optional.ofNullable(excelSpooler.getBeforeStatement()).isPresent()){
                 final CallableStatement callableStatement = conn.prepareCall(excelSpooler.getBeforeStatement());
                 callableStatement.execute();
-            };
+            }
 
             statement = conn.createStatement();
             rs = statement.executeQuery(query);
@@ -133,27 +136,27 @@ public class ExcelService implements InitializingBean {
             rownum = creaIntestazioni(excelSpooler.getExcelSpoolerParams(), cellnum, rownum, s, cellStyle, cellHeaderStyle);
             while (rs.next()) {
                 LOGGER.debug("Creazione riga:{}", rownum);
-                if (new Integer(rownum).compareTo(MAX_RIGHE_FOGLIO) > 0) {
+                if (Integer.valueOf(rownum).compareTo(MAX_RIGHE_FOGLIO) > 0) {
                     rownum = 0;
                     numSheet++;
                     s = wb.createSheet(excelSpooler.getSheetName() + " n°" + numSheet);
-                    s.setDefaultColumnWidth((short) 20);
-                    cellnum = (short) -1;
+                    s.setDefaultColumnWidth(20);
+                    cellnum = -1;
                     rownum = creaIntestazioni(excelSpooler.getExcelSpoolerParams(), cellnum, rownum, s, cellStyle, cellHeaderStyle);
                 }
                 r = s.createRow(rownum++);
-                cellnum = (short) -1;
+                cellnum = -1;
                 for (ExcelSpoolerParam column : excelSpooler.getExcelSpoolerParams()) {
                     cellnum++;
                     c = r.createCell(cellnum);
                     String valoreRC = rs.getString(
                             Optional.ofNullable(column.getColumnName())
-                                    .filter(columnName -> columnName.indexOf(".") != -1)
+                                    .filter(columnName -> columnName.contains("."))
                                     .map(columnName -> columnName.substring(columnName.lastIndexOf(".") + 1))
-                                    .orElseGet(() -> column.getColumnName())
+                                    .orElseGet(column::getColumnName)
                     );
                     final List<ExcelSpoolerParamColumn> excelSpoolerParamColumns = excelRepository.findExcelSpoolerParamColumns(column);
-                    String valoreStringa = excelSpoolerParamColumns.isEmpty() ? valoreRC : valoreRC == null ? valoreRC :
+                    String valoreStringa = excelSpoolerParamColumns.isEmpty() ? valoreRC : valoreRC == null ? null :
                             excelSpoolerParamColumns
                                     .stream()
                                     .filter(espc -> espc.getId().getIdKey().equals(valoreRC))
@@ -163,27 +166,27 @@ public class ExcelService implements InitializingBean {
                     if (valoreStringa != null) {
                         if (column.getColumnType() != null) {
                             if (column.getColumnType().equalsIgnoreCase("VARCHAR")) {
-                                c.setCellType(HSSFCell.CELL_TYPE_STRING);
-                                c.setCellValue(new HSSFRichTextString(valoreStringa));
+                                c.setCellType(CellType.STRING);
+                                c.setCellValue(valoreStringa);
                             } else if (column.getColumnType().equalsIgnoreCase("DECIMAL")) {
-                                c.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+                                c.setCellType(CellType.NUMERIC);
                                 c.setCellValue(new BigDecimal(valoreStringa).doubleValue());
                             } else if (column.getColumnType().equalsIgnoreCase("TIMESTAMP")) {
-                                c.setCellType(HSSFCell.CELL_TYPE_STRING);
-                                c.setCellValue(new HSSFRichTextString(valoreStringa));
+                                c.setCellType(CellType.STRING);
+                                c.setCellValue(valoreStringa);
                             } else {
-                                c.setCellType(HSSFCell.CELL_TYPE_STRING);
-                                c.setCellValue(new HSSFRichTextString(valoreStringa));
+                                c.setCellType(CellType.STRING);
+                                c.setCellValue(valoreStringa);
                             }
                         } else {
-                            c.setCellType(HSSFCell.CELL_TYPE_STRING);
-                            c.setCellValue(new HSSFRichTextString(valoreStringa));
+                            c.setCellType(CellType.STRING);
+                            c.setCellValue(valoreStringa);
                         }
                     }
                 }
             }
             List<String> strings = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName());
-            String collect = strings.stream().collect(Collectors.joining(fileSeparator));
+            String collect = String.join(fileSeparator, strings);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             wb.write(baos);
@@ -219,9 +222,9 @@ public class ExcelService implements InitializingBean {
                             inputStream.close();
                         }
                         Optional.ofNullable(oldFileName)
-                                .map(nomeFile -> Arrays.asList(excelSpooler.getUtcr(), nomeFile).stream().collect(Collectors.joining(fileSeparator)))
+                                .map(nomeFile -> String.join(fileSeparator, excelSpooler.getUtcr(), nomeFile))
                                 .ifPresent(id -> storageService.delete(id));
-                        StringBuffer bodyText = new StringBuffer(excelSpooler.getEmailBody() == null ? "" : excelSpooler.getEmailBody());
+                        StringBuilder bodyText = new StringBuilder(excelSpooler.getEmailBody() == null ? "" : excelSpooler.getEmailBody());
                         bodyText.append("<html><body bgcolor=\"#ffffff\" text=\"#000000\"><BR><BR><b>Nota di riservatezza:</b><br>");
                         bodyText.append("La presente comunicazione ed i suoi allegati sono di competenza solamente del sopraindicato destinatario. ");
                         bodyText.append("Qualsiasi suo utilizzo, comunicazione o diffusione non autorizzata e' proibita.<br>");
@@ -261,9 +264,9 @@ public class ExcelService implements InitializingBean {
             excelRepository.save(excelSpooler);
         } finally {
             try {
-                rs.close();
-                statement.close();
-                conn.close();
+                if (rs != null) rs.close();
+                if (statement != null) statement.close();
+                if (conn != null) conn.close();
             } catch (SQLException e) {
                 throw new JasperRuntimeException("unable to process excel", e);
             }
@@ -271,7 +274,7 @@ public class ExcelService implements InitializingBean {
         return excelSpooler.getPgEstrazione();
     }
 
-    private int creaIntestazioni(List<ExcelSpoolerParam> columns, short cellnum, int rownum, HSSFSheet s, HSSFCellStyle cellStyle, HSSFCellStyle cellHeaderStyle) {
+    private int creaIntestazioni(List<ExcelSpoolerParam> columns, int cellnum, int rownum, HSSFSheet s, HSSFCellStyle cellStyle, HSSFCellStyle cellHeaderStyle) {
         boolean presenteHeader = false;
         for (ExcelSpoolerParam excelSpoolerParam : columns) {
             if (excelSpoolerParam.getHeaderLabel() != null) {
@@ -284,28 +287,28 @@ public class ExcelService implements InitializingBean {
             for (ExcelSpoolerParam column : columns) {
                 cellnum++;
                 HSSFCell c = r.createCell(cellnum);
-                c.setCellValue(new HSSFRichTextString(column.getColumnLabel()));
+                c.setCellValue(column.getColumnLabel());
                 c.setCellStyle(cellStyle);
-                c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                c.setCellType(CellType.STRING);
             }
         } else {
             for (ExcelSpoolerParam column : columns) {
                 cellnum++;
                 if (column.getHeaderLabel() != null) {
                     HSSFCell c = r.createCell(cellnum);
-                    c.setCellValue(new HSSFRichTextString(column.getHeaderLabel()));
+                    c.setCellValue(column.getHeaderLabel());
                     c.setCellStyle(cellHeaderStyle);
-                    c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                    c.setCellType(CellType.STRING);
                 }
             }
             r = s.createRow(rownum++); //creo la seconda
-            cellnum = (short) -1;
+            cellnum = -1;
             for (ExcelSpoolerParam column : columns) {
                 cellnum++;
                 HSSFCell c = r.createCell(cellnum);
-                c.setCellValue(new HSSFRichTextString(column.getColumnLabel()));
+                c.setCellValue(column.getColumnLabel());
                 c.setCellStyle(cellStyle);
-                c.setCellType(HSSFCell.CELL_TYPE_STRING);
+                c.setCellType(CellType.STRING);
             }
         }
         return rownum;
@@ -315,7 +318,7 @@ public class ExcelService implements InitializingBean {
     public void deleteXls(Long pgEstrazione) {
         LOGGER.info("Try to delete excel pgEstrazione: {}", pgEstrazione);
         ExcelSpooler excelSpooler = excelRepository.findById(pgEstrazione).orElseThrow(() -> new RuntimeException("Cannot find excel spooler with id:" + pgEstrazione));
-        String path = Arrays.asList(excelSpooler.getUtcr(), excelSpooler.getName()).stream().collect(Collectors.joining(fileSeparator));
+        String path = String.join(fileSeparator, excelSpooler.getUtcr(), excelSpooler.getName());
 
         storageService.delete(path);
 

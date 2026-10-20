@@ -19,7 +19,7 @@ package it.cnr.si.domain.sigla;
 
 import it.cnr.si.web.PrintThreadLocal;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.sql.Timestamp;
 import java.util.Date;
 

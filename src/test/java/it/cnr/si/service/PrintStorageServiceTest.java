@@ -18,24 +18,21 @@
 package it.cnr.si.service;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.nio.charset.Charset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by francesco on 26/06/17.
  */
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class PrintStorageServiceTest {
 
@@ -47,12 +44,12 @@ public class PrintStorageServiceTest {
     @Autowired
     private PrintStorageService printStorageService;
 
-    @Before
+    @BeforeEach
     public void before() {
         printStorageService.write(FILE, CONTENT.getBytes());
     }
 
-    @After
+    @AfterEach
     public void after() {
         printStorageService.delete(FILE);
     }

@@ -17,7 +17,11 @@
 
 package it.cnr.si.config;
 
-import com.hazelcast.core.*;
+import com.hazelcast.collection.IQueue;
+import com.hazelcast.collection.ItemEvent;
+import com.hazelcast.collection.ItemListener;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
 import it.cnr.si.domain.sigla.*;
 import it.cnr.si.dto.EventPrint;
 import it.cnr.si.service.CacheService;
@@ -48,8 +52,14 @@ public class QueueConfiguration implements InitializingBean {
     @Value("#{'${print.queue.priorita}'.split(',')}")
     private List<String> queuePriorita;
 
+    private static final String LOCKS = "SIGLA_PRINT_LOCKS";
+
     @Autowired
     private HazelcastInstance hazelcastInstance;
+
+    private IMap<String, String> locks() {
+        return hazelcastInstance.getMap(LOCKS);
+    }
 
     @Autowired
     private PrintService printService;
@@ -60,7 +70,7 @@ public class QueueConfiguration implements InitializingBean {
     @Autowired
     private CacheService cacheService;
 
-    public IQueue queuePrintApplication(String priorita) {
+    public IQueue<EventPrint> queuePrintApplication(String priorita) {
         return hazelcastInstance.getQueue(SIGLA_PRIORITA.concat(priorita));
     }
 
@@ -83,15 +93,15 @@ public class QueueConfiguration implements InitializingBean {
 
     public Long executeExcel(ExcelSpooler excelSpooler) {
         String lockKey = XLS.concat(String.valueOf(excelSpooler.getPgEstrazione()));
-        ILock lock = hazelcastInstance.getLock(lockKey);
+        IMap<String, String> lock = locks();
         try {
             LOGGER.info("try lock {}", lockKey);
-            if (lock.tryLock(1, TimeUnit.MILLISECONDS)) {
+            if (lock.tryLock(lockKey, 1, TimeUnit.MILLISECONDS)) {
                 try {
                     return excelService.executeExcel(excelSpooler);
                 } finally {
                     LOGGER.info("unlocking {}", lockKey);
-                    lock.unlock();
+                    lock.unlock(lockKey);
                 }
             } else {
                 LOGGER.info("unable to get lock {}", lockKey);
@@ -104,16 +114,16 @@ public class QueueConfiguration implements InitializingBean {
     }
 
     public void delete() {
-        ILock lock = hazelcastInstance.getLock(DELETEFILE);
+        IMap<String, String> lock = locks();
         try {
             LOGGER.info("try lock {}", DELETEFILE);
-            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+            if (lock.tryLock(DELETEFILE, 1, TimeUnit.SECONDS)) {
                 try {
                     printService.deleteReport();
                     excelService.deleteXls();
                 } finally {
                     LOGGER.info("unlocking {}", DELETEFILE);
-                    lock.unlock();
+                    lock.unlock(DELETEFILE);
                 }
             } else {
                 LOGGER.info("unable to get lock {}", DELETEFILE);
@@ -184,10 +194,10 @@ public class QueueConfiguration implements InitializingBean {
                 PrintSpooler print = null;
                 if (event.getPg_stampa() != null) {
                     String lockKey = PDF.concat(String.valueOf(event.getPg_stampa()));
-                    ILock lock = hazelcastInstance.getLock(lockKey);
+                    IMap<String, String> lock = locks();
                     LOGGER.info("try lock {}", lockKey);
                     try {
-                        if (lock.tryLock(1, TimeUnit.SECONDS)) {
+                        if (lock.tryLock(lockKey, 1, TimeUnit.SECONDS)) {
                             try {
                                 //print = printService.print(pgStampa);
                                 print =getPrinSpooler(event);
@@ -203,7 +213,7 @@ public class QueueConfiguration implements InitializingBean {
                                     printService.error(print, _ex);
                             } finally {
                                 LOGGER.info("unlocking {}", lockKey);
-                                lock.unlock();
+                                lock.unlock(lockKey);
                             }
                         } else {
                             LOGGER.warn("unable to get lock {}", lockKey);

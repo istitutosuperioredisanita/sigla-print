@@ -19,24 +19,21 @@ package it.cnr.si.web;
 
 import it.cnr.si.domain.sigla.*;
 import net.sf.jasperreports.engine.JRParameter;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.util.*;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Created by francesco on 28/09/16.
  */
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class PrintSpoolerResourceTest {
 
@@ -87,7 +84,7 @@ public class PrintSpoolerResourceTest {
         assertTrue(responseEntity.getBody().compareTo(Long.decode("0")) > 0);
     }
 
-    @After
+    @AfterEach
     public void shutdown() {
         printSpooleResource.deletePrintSpooler(pgStampa, "tes");
     }

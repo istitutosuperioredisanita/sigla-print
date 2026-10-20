@@ -17,7 +17,7 @@
 
 package it.cnr.si.domain.sigla;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;

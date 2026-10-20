@@ -37,10 +37,11 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <java.version>1.8</java.version>
-    <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
-    <sprint.version>3.0.1</sprint.version>
-    <jasperreports.version>6.11.0</jasperreports.version>
+    <java.version>21</java.version>
+    <maven.compiler.release>21</maven.compiler.release>
+    <spring-boot.version>4.1.1</spring-boot.version>
+    <storage-cloud.version>3.0.2</storage-cloud.version>
+    <jasperreports.version>6.21.3</jasperreports.version>
     <lowagie.itext.version>2.1.7</lowagie.itext.version>
     <start-class>it.cnr.si.SiglaPrintApplication</start-class>
   </properties>
@@ -78,7 +79,7 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-web</artifactId>
+      <artifactId>spring-boot-starter-webmvc</artifactId>
       <exclusions>
         <exclusion>
           <groupId>org.jboss.logging</groupId>
@@ -114,12 +115,17 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>9.4-1203-jdbc42</version>
     </dependency>
     <dependency>
       <groupId>org.olap4j</groupId>
       <artifactId>olap4j</artifactId>
       <version>1.2.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -129,23 +135,17 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>1.4.192</version><!--$NO-MVN-MAN-VER$-->
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.5</version>
-    </dependency>
-    <dependency>
-      <groupId>xml-apis</groupId>
-      <artifactId>xml-apis</artifactId>
-      <version>1.4.01</version>
+      <version>2.16.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
-      <version>3.0-FINAL</version>
+      <version>5.5.1</version>
       <exclusions>
         <exclusion>
           <groupId>log4j</groupId>
@@ -158,30 +158,58 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>it.cnr.si.sprint</groupId>
-      <artifactId>sprint-logging</artifactId>
-      <version>${sprint.version}</version>
+      <groupId>it.cnr.si.storage</groupId>
+      <artifactId>storage-cloud-commons</artifactId>
+      <version>${storage-cloud.version}</version>
     </dependency>
     <dependency>
-      <groupId>it.cnr.si.sprint</groupId>
-      <artifactId>sprint-storage</artifactId>
-      <version>${sprint.version}</version>
+      <groupId>it.cnr.si.storage</groupId>
+      <artifactId>storage-cloud-cmis</artifactId>
+      <version>${storage-cloud.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>it.cnr.si.storage</groupId>
+      <artifactId>storage-cloud-s3</artifactId>
+      <version>${storage-cloud.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>it.cnr.si.storage</groupId>
+      <artifactId>storage-cloud-filesystem</artifactId>
+      <version>${storage-cloud.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-hazelcast</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.hazelcast</groupId>
+      <artifactId>hazelcast-spring</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.6</version>
     </dependency>
     <dependency>
         <groupId>org.apache.chemistry.opencmis</groupId>
         <artifactId>chemistry-opencmis-client-impl</artifactId>
         <version>1.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>it.cnr.si.sprint</groupId>
-      <artifactId>sprint-custom</artifactId>
-      <version>${sprint.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>hazelcast-hibernate4</artifactId>
-          <groupId>com.hazelcast</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>me.moocar</groupId>
@@ -211,23 +239,12 @@
     <dependency>
       <groupId>com.jcabi</groupId>
       <artifactId>jcabi-github</artifactId>
-      <version>0.41</version>
+      <version>1.8.0</version>
     </dependency>
     <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger2</artifactId>
-      <version>2.9.2</version>
-    </dependency>
-
-    <dependency>
-      <groupId>io.springfox</groupId>
-      <artifactId>springfox-swagger-ui</artifactId>
-      <version>2.9.2</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>20.0</version>
+      <groupId>org.springdoc</groupId>
+      <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+      <version>3.1.1</version>
     </dependency>
   </dependencies>
 
@@ -244,6 +261,60 @@
       </plugins>
     </pluginManagement>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <releaseProfiles>!sonar</releaseProfiles>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot.version}</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+            <configuration>
+              <mainClass>${start-class}</mainClass>
+            </configuration>
+          </execution>
+        </executions>
+        <configuration>
+          <mainClass>${start-class}</mainClass>
+        </configuration>
+      </plugin>
+      <!-- Add modern JaCoCo plugin to prevent Java 21 system class instrumentation crashes -->
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>0.8.12</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <phase>test</phase>
+            <goals>
+              <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>

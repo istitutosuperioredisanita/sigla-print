@@ -19,6 +19,35 @@
 <configuration>
     <property name="syslog.url" value="${syslog.url:-sigla-print.cedrc.cnr.it}" />
     <property name="LOG_FILE" value="${LOG_FILE:-logs/sigla-print.log}" />
-    <include resource="logging/properties/prod.xml" />
-    <include resource="logging/base.xml" />
+    <!-- Syslog -->
+    <property name="syslog.host" value="${syslog.host:-logsrv.cedrc.cnr.it}" />
+    <property name="syslog.port" value="${syslog.port:-1517}" />
+    
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>${syslog.host}</syslogHost>
+        <port>${syslog.port}</port>
+        <facility>USER</facility>
+        <suffixPattern>${syslog.url} %-5level [%thread] %logger{36} - %msg%n</suffixPattern>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="FILE" />
+        <appender-ref ref="SYSLOG" />
+    </root>
 </configuration>

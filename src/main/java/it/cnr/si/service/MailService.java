@@ -24,11 +24,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.InternetHeaders;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetHeaders;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +58,7 @@ public class MailService {
         message.setSubject(subject);
         message.setText(body);
 
-        MimeMultipart multipart = new javax.mail.internet.MimeMultipart();
+        MimeMultipart multipart = new jakarta.mail.internet.MimeMultipart();
         MimeBodyPart messageBodyPart = new MimeBodyPart();
         messageBodyPart.attachFile(output);
         messageBodyPart.setFileName(fileName);
@@ -67,7 +67,7 @@ public class MailService {
         InternetHeaders internetHeaders = new InternetHeaders();
         internetHeaders.addHeader("Content-Description", TEST_HTML);
         internetHeaders.addHeader(CONTENT_TYPE, TEXT_HTML);
-        multipart.addBodyPart(new javax.mail.internet.MimeBodyPart(internetHeaders, body.getBytes(StandardCharsets.ISO_8859_1)));
+        multipart.addBodyPart(new jakarta.mail.internet.MimeBodyPart(internetHeaders, body.getBytes(StandardCharsets.ISO_8859_1)));
 
         multipart.addBodyPart(messageBodyPart);
         message.setContent(multipart);
