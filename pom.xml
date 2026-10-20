@@ -270,13 +270,6 @@
           </compilerArgs>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <releaseProfiles>!sonar</releaseProfiles>
-        </configuration>
-      </plugin>
       <!-- Add modern JaCoCo plugin to prevent Java 21 system class instrumentation crashes -->
       <plugin>
         <groupId>org.jacoco</groupId>
