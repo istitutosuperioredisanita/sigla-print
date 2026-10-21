@@ -24,8 +24,8 @@ import it.cnr.si.repository.ExcelRepository;
 import it.cnr.si.repository.ParametriEnteRepository;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -100,21 +100,21 @@ public class ExcelService implements InitializingBean {
         Statement statement = null;
         ResultSet rs = null;
 
-        HSSFWorkbook wb = new HSSFWorkbook(); // Istanzio la classe workbook
-        HSSFSheet s = wb.createSheet(excelSpooler.getSheetName()); // creo un foglio
-        HSSFRow r = null; // dichiaro r di tipo riga
-        HSSFCell c = null; // dichiaro c di tipo cella
+        Workbook wb = new XSSFWorkbook(); // Istanzio la classe workbook
+        Sheet s = wb.createSheet(excelSpooler.getSheetName()); // creo un foglio
+        Row r = null; // dichiaro r di tipo riga
+        Cell c = null; // dichiaro c di tipo cella
         s.setDefaultColumnWidth(20);
 
-        HSSFCellStyle cellStyle = wb.createCellStyle();
+        CellStyle cellStyle = wb.createCellStyle();
         cellStyle.setAlignment(HorizontalAlignment.CENTER_SELECTION);
-        HSSFFont font = wb.createFont();
+        Font font = wb.createFont();
         font.setBold(true);
         cellStyle.setFont(font);
 
-        HSSFCellStyle cellHeaderStyle = wb.createCellStyle();
+        CellStyle cellHeaderStyle = wb.createCellStyle();
         cellHeaderStyle.setAlignment(HorizontalAlignment.CENTER_SELECTION);
-        HSSFFont fontHeader = wb.createFont();
+        Font fontHeader = wb.createFont();
         fontHeader.setBold(true);
         fontHeader.setColor(HSSFFont.COLOR_RED);
         cellHeaderStyle.setFont(fontHeader);
@@ -274,7 +274,7 @@ public class ExcelService implements InitializingBean {
         return excelSpooler.getPgEstrazione();
     }
 
-    private int creaIntestazioni(List<ExcelSpoolerParam> columns, int cellnum, int rownum, HSSFSheet s, HSSFCellStyle cellStyle, HSSFCellStyle cellHeaderStyle) {
+    private int creaIntestazioni(List<ExcelSpoolerParam> columns, int cellnum, int rownum, Sheet s, CellStyle cellStyle, CellStyle cellHeaderStyle) {
         boolean presenteHeader = false;
         for (ExcelSpoolerParam excelSpoolerParam : columns) {
             if (excelSpoolerParam.getHeaderLabel() != null) {
@@ -282,11 +282,11 @@ public class ExcelService implements InitializingBean {
                 break;
             }
         }
-        HSSFRow r = s.createRow(rownum++);
+        Row r = s.createRow(rownum++);
         if (!presenteHeader) {
             for (ExcelSpoolerParam column : columns) {
                 cellnum++;
-                HSSFCell c = r.createCell(cellnum);
+                Cell c = r.createCell(cellnum);
                 c.setCellValue(column.getColumnLabel());
                 c.setCellStyle(cellStyle);
                 c.setCellType(CellType.STRING);
@@ -295,7 +295,7 @@ public class ExcelService implements InitializingBean {
             for (ExcelSpoolerParam column : columns) {
                 cellnum++;
                 if (column.getHeaderLabel() != null) {
-                    HSSFCell c = r.createCell(cellnum);
+                    Cell c = r.createCell(cellnum);
                     c.setCellValue(column.getHeaderLabel());
                     c.setCellStyle(cellHeaderStyle);
                     c.setCellType(CellType.STRING);
@@ -305,7 +305,7 @@ public class ExcelService implements InitializingBean {
             cellnum = -1;
             for (ExcelSpoolerParam column : columns) {
                 cellnum++;
-                HSSFCell c = r.createCell(cellnum);
+                Cell c = r.createCell(cellnum);
                 c.setCellValue(column.getColumnLabel());
                 c.setCellStyle(cellStyle);
                 c.setCellType(CellType.STRING);

@@ -158,6 +158,11 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+      <version>5.5.1</version>
+    </dependency>
+    <dependency>
       <groupId>it.cnr.si.storage</groupId>
       <artifactId>storage-cloud-commons</artifactId>
       <version>${storage-cloud.version}</version>
