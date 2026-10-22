@@ -41,7 +41,7 @@
     <maven.compiler.release>21</maven.compiler.release>
     <spring-boot.version>4.1.1</spring-boot.version>
     <storage-cloud.version>3.0.2</storage-cloud.version>
-    <jasperreports.version>6.11.0</jasperreports.version>
+    <jasperreports.version>7.1.0</jasperreports.version>
     <lowagie.itext.version>2.1.7</lowagie.itext.version>
     <start-class>it.cnr.si.SiglaPrintApplication</start-class>
   </properties>
@@ -101,6 +101,24 @@
           <artifactId>itext</artifactId>
         </exclusion>
       </exclusions>
+    </dependency>
+    <!-- Modulo PDF per JasperReports 7 -->
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-pdf</artifactId>
+      <version>${jasperreports.version}</version>
+    </dependency>
+
+    <!-- Modulo JSON per JasperReports 7 -->
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-json</artifactId>
+      <version>${jasperreports.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jasperreports</groupId>
+      <artifactId>jasperreports-spring</artifactId>
+      <version>${jasperreports.version}</version>
     </dependency>
     <dependency>
       <groupId>com.lowagie</groupId>
@@ -212,9 +230,9 @@
       <version>2.6</version>
     </dependency>
     <dependency>
-        <groupId>org.apache.chemistry.opencmis</groupId>
-        <artifactId>chemistry-opencmis-client-impl</artifactId>
-        <version>1.0.0</version>
+      <groupId>org.apache.chemistry.opencmis</groupId>
+      <artifactId>chemistry-opencmis-client-impl</artifactId>
+      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>me.moocar</groupId>

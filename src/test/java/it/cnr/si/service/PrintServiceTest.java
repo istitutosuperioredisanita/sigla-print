@@ -25,7 +25,7 @@ import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JasperPrint;
 
-import net.sf.jasperreports.engine.data.JsonDataSource;
+import net.sf.jasperreports.json.data.JsonDataSource;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;

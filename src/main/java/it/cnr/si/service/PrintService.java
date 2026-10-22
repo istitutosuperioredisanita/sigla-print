@@ -12,7 +12,7 @@
  *     GNU Affero General Public License for more details.
  *
  *     You should have received a copy of the GNU Affero General Public License
- *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *     along with this program.  If not, see <https://www.licenses.org/>.
  */
 
 package it.cnr.si.service;
@@ -25,13 +25,13 @@ import it.cnr.si.repository.ParametriEnteRepository;
 import it.cnr.si.repository.PrintParamRepository;
 import it.cnr.si.repository.PrintRepository;
 import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JsonDataSource;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.json.data.JsonDataSource;
+import net.sf.jasperreports.pdf.JRPdfExporter;
 import net.sf.jasperreports.engine.fill.JRFileVirtualizer;
 import net.sf.jasperreports.export.ExporterInput;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
-import net.sf.jasperreports.export.SimplePdfExporterConfiguration;
+import net.sf.jasperreports.pdf.SimplePdfExporterConfiguration;
 import net.sf.jasperreports.repo.InputStreamResource;
 import net.sf.jasperreports.repo.ReportResource;
 import net.sf.jasperreports.repo.RepositoryService;
@@ -129,7 +129,7 @@ public class PrintService implements InitializingBean {
         } catch (JRException e) {
             throw new JasperRuntimeException("unable to export report " + print.toString(), e);
         } finally {
-            if (virtualizerEnable)
+            if (virtualizerEnable && jrVirtualizer != null)
                 jrVirtualizer.cleanup();
         }
 
@@ -203,7 +203,6 @@ public class PrintService implements InitializingBean {
                     pgStampa, printSpooler.getStato(), printSpooler.getDtProssimaEsecuzione());
             return null;
         }
-
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -327,9 +326,9 @@ public class PrintService implements InitializingBean {
     }
 
 
-    class CacheAwareJasperReportsContext implements JasperReportsContext {
+    static class CacheAwareJasperReportsContext implements JasperReportsContext {
 
-        private JasperReportsContext jasperReportsContext;
+        private final JasperReportsContext jasperReportsContext;
 
         public CacheAwareJasperReportsContext(JasperReportsContext jasperReportsContext) {
             this.jasperReportsContext = jasperReportsContext;
@@ -351,11 +350,13 @@ public class PrintService implements InitializingBean {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public <T> List<T> getExtensions(Class<T> extensionType) {
             if (extensionType.isAssignableFrom(RepositoryService.class)) {
-                return (List<T>) Arrays.asList(new CacheAwareRepositoryService());
+                return (List<T>) Collections.singletonList(new CacheAwareRepositoryService());
             } else {
-                return jasperReportsContext.getExtensions(extensionType).stream().distinct().collect(Collectors.toList());
+                List<T> extensions = jasperReportsContext.getExtensions(extensionType);
+                return extensions != null ? extensions.stream().distinct().collect(Collectors.toList()) : Collections.emptyList();
             }
         }
 
@@ -367,7 +368,6 @@ public class PrintService implements InitializingBean {
         @Override
         public void setProperty(String key, String value) {
             jasperReportsContext.setProperty(key, value);
-
         }
 
         @Override
@@ -382,7 +382,7 @@ public class PrintService implements InitializingBean {
     }
 
 
-    class CacheAwareRepositoryService implements RepositoryService {
+    static class CacheAwareRepositoryService implements RepositoryService {
 
         @Override
         public Resource getResource(String uri) {
@@ -395,17 +395,18 @@ public class PrintService implements InitializingBean {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public <K extends Resource> K getResource(String uri, Class<K> resourceType) {
 
             if (resourceType.isAssignableFrom(ReportResource.class)) {
                 String key = uri.substring(0, uri.indexOf(".jasper")).concat(".jrxml");
                 ReportResource reportResource = new ReportResource();
-                JasperReport report = cacheService.jasperSubReport(key);
+                JasperReport report = CacheServiceHolder.getCacheService().jasperSubReport(key);
                 reportResource.setReport(report);
                 return (K) reportResource;
             } else if (resourceType.isAssignableFrom(InputStreamResource.class)) {
                 InputStreamResource inputStreamResource = new InputStreamResource();
-                byte[] bytes = cacheService.imageReport(uri);
+                byte[] bytes = CacheServiceHolder.getCacheService().imageReport(uri);
                 InputStream inputStream = new ByteArrayInputStream(bytes);
                 inputStreamResource.setInputStream(inputStream);
                 return (K) inputStreamResource;
@@ -413,8 +414,25 @@ public class PrintService implements InitializingBean {
 
             throw new NotImplementedException("unable to serve resource " + uri + " of type " + resourceType.getCanonicalName());
         }
-
     }
+
+    /**
+     * Helper holder component to inject CacheService safely into static inner classes context if needed,
+     * or it can be accessed directly if converted to a standard service configuration.
+     */
+    private static CacheService staticCacheService;
+
+    @Autowired
+    public void setCacheService(CacheService cacheService) {
+        PrintService.staticCacheService = cacheService;
+    }
+
+    private static class CacheServiceHolder {
+        public static CacheService getCacheService() {
+            return PrintService.staticCacheService;
+        }
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public Long createPrintSpooler(PrintSpooler printSpooler) {
         LOGGER.info("Create Record printSpooler: {}", printSpooler);
@@ -423,10 +441,10 @@ public class PrintService implements InitializingBean {
                 .isPresent()) {
             printSpooler.setPgStampa(
                     Optional.ofNullable(printRepository.findMaxPgStampa())
-                        .orElse(BigDecimal.ONE.longValue())
+                            .orElse(BigDecimal.ONE.longValue())
             );
         }
-        printRepository.save( printSpooler);
+        printRepository.save(printSpooler);
         return printSpooler.getPgStampa();
     }
 
@@ -437,11 +455,10 @@ public class PrintService implements InitializingBean {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public PrintSpooler updatePrintSpooler(Long pg_stampa,PrintSpooler printSpoller) {
+    public PrintSpooler updatePrintSpooler(Long pg_stampa, PrintSpooler printSpoller) {
         LOGGER.info("update Record printSpoller: {}", pg_stampa);
-        PrintSpooler printSpoolerDB= printRepository.findById(pg_stampa).orElseThrow(() -> new RuntimeException("Cannot find print with id:" + pg_stampa));
-        printSpoller.setPgStampa( printSpoolerDB.getPgStampa());
-        return printRepository.save( printSpoller);
+        PrintSpooler printSpoolerDB = printRepository.findById(pg_stampa).orElseThrow(() -> new RuntimeException("Cannot find print with id:" + pg_stampa));
+        printSpoller.setPgStampa(printSpoolerDB.getPgStampa());
+        return printRepository.save(printSpoller);
     }
-
 }

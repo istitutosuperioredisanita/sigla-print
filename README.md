@@ -3,6 +3,7 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 ![Java 21](https://img.shields.io/badge/Java-21-orange)
 ![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1-brightgreen)
+![JasperReports 7.1](https://img.shields.io/badge/JasperReports-7.1-red)
 
 Componente Spring Boot di **SIGLA** (sistema contabile degli enti di ricerca) che produce **stampe** (PDF, tramite JasperReports) ed **estrazioni Excel** a partire da una coda di richieste. Le richieste arrivano da SIGLA attraverso uno spooler su database, vengono accodate per priorità, elaborate in modo asincrono e il risultato viene salvato su uno storage (CMIS, S3 o filesystem) da cui l'utente può scaricarlo.
 
@@ -15,7 +16,8 @@ Componente Spring Boot di **SIGLA** (sistema contabile degli enti di ricerca) ch
 - [Esecuzione](#esecuzione)
 - [API](#api)
 - [Docker](#docker)
-- [Sorgente dei report (GitHub / GitLab)](#sorgente-dei-report-github--gitlab)
+- [Sorgente dei report (GitHub / GitLab / filesystem)](#sorgente-dei-report-github--gitlab--filesystem)
+- [Font dei report](#font-dei-report)
 - [Test](#test)
 - [Release e CI](#release-e-ci)
 - [Note di migrazione](#note-di-migrazione)
@@ -29,7 +31,7 @@ Componente Spring Boot di **SIGLA** (sistema contabile degli enti di ricerca) ch
 4. Il file prodotto viene scritto sullo **storage** con path `<utente>/<nome file>`; lo stato della richiesta passa a `S` (successo) o `E` (errore) e, se richiesto, viene inviata una e-mail con l'allegato.
 5. Il file è scaricabile via REST; un job pianificato (`print.deletecron`) elimina le stampe scadute.
 
-I template `.jrxml`/`.jasper` e le immagini sono letti dal repository dei report (vedi [sotto](#sorgente-dei-report-github--gitlab)) e tenuti in cache (cache `jasper-cache`, con eviction tramite webhook).
+I template `.jrxml`/`.jasper` (formato **JasperReports 7.1**) e le immagini sono letti dal repository dei report (vedi [sotto](#sorgente-dei-report-github--gitlab--filesystem)) e tenuti in cache (cache `jasper-cache`, con eviction tramite webhook).
 
 ## Requisiti
 
@@ -53,7 +55,7 @@ Il risultato è un WAR eseguibile (`java -jar`).
 
 ## Configurazione
 
-La configurazione è in `src/main/resources/application*.yml` ed è organizzata per **profili**: `common` (base), `dev`, `prod`, e il profilo della sorgente report (`github` o `gitlab`). Ogni valore si può sovrascrivere da riga di comando (`--chiave=valore`) o con variabili d'ambiente.
+La configurazione è in `src/main/resources/application*.yml` ed è organizzata per **profili**: `common` (base), `dev`, `prod`, e il profilo della sorgente report (`github` o `gitlab`; per la sorgente filesystem basta impostare `cnr.filesystem.path`). Ogni valore si può sovrascrivere da riga di comando (`--chiave=valore`) o con variabili d'ambiente.
 
 ```bash
 --spring.profiles.active=common,prod,github
@@ -184,9 +186,9 @@ docker run --rm -p 8080:8080 \
 
 Le immagini vengono pubblicate su `ghcr.io/istitutosuperioredisanita/sigla-print` (`latest` dal branch di sviluppo, e il tag della release).
 
-## Sorgente dei report (GitHub / GitLab)
+## Sorgente dei report (GitHub / GitLab / filesystem)
 
-I report sono in un repository separato, selezionato dal profilo attivo:
+I report sono in un repository o in una cartella separata. La sorgente è un bean `JasperSource` che fornisce il contenuto di un template o di un'immagine a partire dal suo percorso; si attiva con il profilo o con la proprietà indicata:
 
 ```yaml
 # profilo github
@@ -202,9 +204,29 @@ cnr.gitlab:
   project: sigla-reports
   ref: formazione
   token:
+
+# filesystem (si attiva impostando cnr.filesystem.path)
+cnr.filesystem:
+  path: /percorso/sigla-reports   # cartella radice dei report
 ```
 
-Configurare un webhook di push del repository sull'endpoint `/api/v1/hook`: a ogni commit i report modificati vengono rimossi dalla cache e ricaricati alla richiesta successiva.
+Va configurata **una sola** sorgente: con più sorgenti attive Spring segnala più bean `JasperSource`.
+
+Con GitHub e GitLab configurare un webhook di push del repository sull'endpoint `/api/v1/hook`: a ogni commit i report modificati vengono rimossi dalla cache e ricaricati alla richiesta successiva. Con il filesystem non c'è un push da notificare: i file sono letti dalla cartella e tenuti in cache (`jasper-cache`), quindi una modifica è visibile dopo l'invalidazione della cache.
+
+Con la sorgente filesystem le chiavi sono percorsi relativi alla cartella radice (ad es. `cnrdoccont/doccont/vpg_reversale.jrxml`); i percorsi che escono dalla cartella radice vengono rifiutati.
+
+I report devono essere nel **formato JasperReports 7**. Per convertire un repository di report dal formato 6.x vedi [Note di migrazione](#note-di-migrazione).
+
+## Font dei report
+
+I report usano il font **Times New Roman**, che va registrato come estensione di JasperReports; senza, il testo viene misurato con un font sostitutivo e i campi ad altezza fissa possono risultare vuoti o tagliati. La registrazione è in `src/main/resources`:
+
+- `jasperreports_extension.properties`: attiva `SimpleFontExtensionsRegistryFactory` e punta a `fontfamilies.xml`;
+- `fontfamilies.xml`: definisce la famiglia `Times New Roman` (normale, grassetto, corsivo, grassetto corsivo), con `Identity-H` e incorporamento nel PDF;
+- `fonts/`: i file `times.ttf`, `timesbd.ttf`, `timesi.ttf`, `timesbi.ttf`.
+
+Per aggiungere un altro font si aggiunge un `<fontFamily>` in `fontfamilies.xml` e i relativi `.ttf` in `fonts/`.
 
 ## Test
 
@@ -228,7 +250,12 @@ Stato corrente rispetto alle versioni precedenti (2.x):
 - Lo storage non usa più `cnr.fs.path`: usare `cnr.storage.driver` e le relative proprietà. Il layout dei file è cambiato (cartella radice `print.storage.base-path`).
 - I lock distribuiti usano `IMap.tryLock` (Hazelcast 5) al posto di `ILock`.
 - La documentazione API è generata da springdoc (al posto di Springfox).
-- `jasperreports` 6.20.x: ricontrollare i report esistenti.
+- **JasperReports 7.1** (prima 6.20.x): il formato `.jrxml` è cambiato (elementi `<element kind="...">`, bande singole senza `<band>`, `<expression>`, `<query>`, import come testo, attributi `isXxx` → `xxx`, namespace rimosso) e i report 6.x non si caricano più così come sono.
+    - Conversione: nel repository `sigla-reports`, `tools/jrxml-v7/convert-jasper.py` converte i report in un albero parallelo e il progetto Maven `tools/jrxml-v7` li carica e compila con JasperReports 7.1.0, producendo un CSV con l'esito per file. Crosstab e grafici non sono convertiti automaticamente (cartella `_da_convertire_a_mano/`): vanno aperti e salvati di nuovo con Jaspersoft Studio 7.
+    - Alias rimossi: `stretchType="RelativeToBandHeight"` diventa `ContainerHeight`.
+    - Il registro dei font `SpringExtensionsRegistryFactory` non esiste più: vedi [Font dei report](#font-dei-report).
+    - Dopo la conversione ricontrollare le stampe confrontandole con quelle prodotte dalla versione precedente.
+- Nuova sorgente report su **filesystem** (`cnr.filesystem.path`), accanto a GitHub e GitLab.
 
 ## Licenza
 
