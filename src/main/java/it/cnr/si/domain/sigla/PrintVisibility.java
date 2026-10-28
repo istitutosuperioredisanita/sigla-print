@@ -17,6 +17,9 @@
 
 package it.cnr.si.domain.sigla;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.*;
 
 public enum PrintVisibility {
@@ -68,6 +71,16 @@ public enum PrintVisibility {
     @Override
     public String toString() {
         return value;
+    }
+
+    @JsonCreator
+    public static PrintState fromJson(String value) {
+        return PrintState.valueOf(value);
+    }
+
+    @JsonValue
+    public String toJson() {
+        return name();
     }
 
 }
