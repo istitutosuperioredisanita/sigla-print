@@ -1,5 +1,5 @@
 # DOCKER-VERSION 17.10.0-ce
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jdk
 MAINTAINER Francesco Uliana <francesco.uliana@cnr.it>
 
 COPY target/*.war /opt/sigla-print.war
