@@ -34,7 +34,7 @@ jobs:
           # Se il branch è master, aggiungiamo anche il tag 'latest'
           if [ "${{ github.ref_name }}" == "master" ]; then
             docker tag $IMAGE_ID:${{ github.ref_name }} $IMAGE_ID:latest
-
+          fi
       - name: Push Docker image
         run: |
          IMAGE_ID=ghcr.io/${{ github.repository }}
