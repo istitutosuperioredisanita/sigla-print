@@ -25,8 +25,24 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}:latest .
+          # Definiamo il nome base dell'immagine per comodità
+          IMAGE_ID=ghcr.io/${{ github.repository }}
+          
+          # Tagghiamo sempre con il nome del branch (es. master o sviluppo)
+          docker build -t $IMAGE_ID:${{ github.ref_name }} .
+          
+          # Se il branch è master, aggiungiamo anche il tag 'latest'
+          if [ "${{ github.ref_name }}" == "master" ]; then
+            docker tag $IMAGE_ID:${{ github.ref_name }} $IMAGE_ID:latest
 
       - name: Push Docker image
         run: |
-          docker push ghcr.io/${{ github.repository }}:latest
+         IMAGE_ID=ghcr.io/${{ github.repository }}
+
+          # Push del tag specifico del branch
+          docker push $IMAGE_ID:${{ github.ref_name }}
+          
+          # Se il branch è master, facciamo il push anche di 'latest'
+          if [ "${{ github.ref_name }}" == "master" ]; then
+            docker push $IMAGE_ID:latest
+          fi
